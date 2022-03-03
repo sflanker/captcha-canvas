@@ -1,4 +1,4 @@
-import { Image, loadImage } from "skia-canvas";
+import { Image, loadImage } from "canvas";
 import { Captcha } from ".";
 import { defaultCaptchaOption, defaultDecoyOptions, defaultTraceOptions, SetCaptchaOption, SetDecoyOption, SetTraceOption } from "./constants";
 import { randomText } from "./util";
@@ -143,7 +143,7 @@ export class CaptchaGenerator {
     }
     /**
      * Non asynchronous method to generate captcha image.
-     * > Note: It do not use `setBackground` method value for background image. If you want to set background
+     * > Note: It does not use `setBackground` method value for background image. If you want to set background
      * and also use generateSync method then use background option in genrateSync method.
      * @param {object} [options] Options to add extra values
      * @param {Image} [options.background] Add background image.
@@ -160,7 +160,6 @@ export class CaptchaGenerator {
      */
     generateSync(option: { background?: Image } = {}): Buffer {
         const captchaCanvas = new Captcha(this.width, this.height);
-        captchaCanvas.async = false;
 
         if(option.background) captchaCanvas.drawImage(option.background);
         if(this.decoy.opacity) captchaCanvas.addDecoy(this.decoy);

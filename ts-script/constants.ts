@@ -1,4 +1,4 @@
-import { Image } from "skia-canvas";
+import { Image } from "canvas";
 
 export interface SetDimensionOption {
     height: number;

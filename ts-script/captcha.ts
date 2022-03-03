@@ -1,4 +1,4 @@
-import { Canvas, CanvasRenderingContext2D, Image } from "skia-canvas";
+import { Canvas, CanvasRenderingContext2D, Image } from "canvas";
 import { defaultCaptchaOption, defaultDecoyOptions, defaultDimension, defaultTraceOptions, SetCaptchaOption, SetDecoyOption, SetTraceOption } from "./constants";
 import { getRandom, getRandomCoordinate, randomText } from "./util";
 
@@ -14,7 +14,6 @@ export class Captcha {
     protected _canvas: Canvas;
     protected _ctx: CanvasRenderingContext2D;
     protected _coordinates: number[][];
-    public async: Boolean;
     /**
      * Start captcha image creation.
      * @param {number} [width] Width of captcha image.
@@ -33,7 +32,6 @@ export class Captcha {
 		ctx.textBaseline = 'middle';
         this._canvas = canvas;
         this._ctx = ctx;
-        this.async = true;
         this._coordinates = [];
     }
     /**
@@ -45,11 +43,10 @@ export class Captcha {
     }
     /**
      * Get png image of captcha.
-     * @returns {Buffer | Promise<Buffer>} Get png image of captcha created.
+     * @returns {Buffer} Get png image of captcha created.
      */
-    get png(): Buffer | Promise<Buffer> {
-        this._canvas.async = this.async;
-        return this._canvas.png;
+    get png(): Buffer {
+        return this._canvas.toBuffer("image/png");
     }
     /**
      * Draw image on your captcha.
@@ -71,8 +68,8 @@ export class Captcha {
 
         const decoyText = randomText(option.total);
         this._ctx.font = `${option.size}px ${option.font}`;
-        this._ctx.globalAlpha = option.opacity;
-        this._ctx.fillStyle = option.color;
+        this._ctx.globalAlpha = option.opacity ?? (defaultDecoyOptions.opacity as number);
+        this._ctx.fillStyle = option.color ?? (defaultDecoyOptions.color as string);
 		for(let i = 0; i < decoyText.length; i++) {
 			this._ctx.fillText(decoyText[i], getRandom(30, this._width - 30), getRandom(30, this._height - 30));
 		}
@@ -80,9 +77,9 @@ export class Captcha {
     }
     /**
      * Draw trace line over your captcha.
-     * 
+     *
      * Note: If you want to use custom text or change size of captcha text then drawCaptcha before drawTrace.
-     * @param {SetTraceOptions} [traceOption] 
+     * @param {SetTraceOptions} [traceOption]
      * @returns {Captcha}
      */
     drawTrace(traceOption: SetTraceOption = {}): Captcha {
@@ -90,12 +87,12 @@ export class Captcha {
         if(!this._coordinates[0]) this._coordinates = getRandomCoordinate(this._height, this._width, this._captcha.characters || 6);
         const coordinates: number[][] = this._coordinates;
 
-        this._ctx.strokeStyle = option.color;
-		this._ctx.globalAlpha = option.opacity;
+        this._ctx.strokeStyle = option.color ?? (defaultTraceOptions.color as string);
+		this._ctx.globalAlpha = option.opacity ?? (defaultTraceOptions.opacity as number);
 
 		this._ctx.beginPath();
 		this._ctx.moveTo(coordinates[0][0], coordinates[0][1]);
-		this._ctx.lineWidth = option.size;
+		this._ctx.lineWidth = option.size ?? (defaultTraceOptions.size as number);
 		for(let i = 1; i < coordinates.length; i++) {
 			this._ctx.lineTo(coordinates[i][0], coordinates[i][1]);
 		}
@@ -105,7 +102,7 @@ export class Captcha {
     }
     /**
      * Draw captcha text on captcha image.
-     * @param {SetCaptchaOptions} [captchaOption] 
+     * @param {SetCaptchaOptions} [captchaOption]
      * @returns {Captcha}
      */
     drawCaptcha(captchaOption: SetCaptchaOption = {}): Captcha {
@@ -117,10 +114,10 @@ export class Captcha {
 
         if(!this._coordinates[0]) this._coordinates = getRandomCoordinate(this._height, this._width, option.characters || 6);
         const coordinates: number[][] = this._coordinates;
-        
+
         this._ctx.font = `${option.size}px ${option.font}`;
-		this._ctx.globalAlpha = option.opacity;
-		this._ctx.fillStyle = option.color;
+		this._ctx.globalAlpha = option.opacity ?? (defaultCaptchaOption.opacity as number);
+		this._ctx.fillStyle = option.color ?? (defaultCaptchaOption.color as string);
 
 		for(let n = 0; n < coordinates.length; n++) {
 			this._ctx.save();
@@ -136,6 +133,6 @@ export class Captcha {
     }
 
     toBuffer() {
-        this._canvas.toBuffer('png');
+        this._canvas.toBuffer('image/png');
     }
 }
